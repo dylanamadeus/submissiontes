@@ -3,121 +3,110 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
-project_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+st.markdown("""
+    <style>
+    .title {
+        font-size: 48px;
+        font-weight: bold;
+        color: #1f77b4;
+        text-align: center;
+        padding: 20px;
+    }
+    </style>
+    <h1 class="title">🚴‍♂️ Bike Sharing Data Visualization 🚴‍♀️</h1>
+    """, unsafe_allow_html=True)
 
+project_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 file_path_day_csv = os.path.join(project_folder, "data", "day.csv")
 file_path_hour_csv = os.path.join(project_folder, "data", "hour.csv")
 
-# Membaca file .csv menggunakan pandas
-day_df = pd.read_csv(file_path_day_csv)
-hour_df = pd.read_csv(file_path_hour_csv)
-
-#hour_df = pd.read_csv("data/hour.csv")
-#day_df = pd.read_csv("data/day.csv")
+day_data = pd.read_csv(file_path_day_csv)
+hour_data = pd.read_csv(file_path_hour_csv)
 
 dteday_column = ["dteday"]
 for column in dteday_column:
-    day_df[column] = pd.to_datetime(day_df[column])
+    day_data[column] = pd.to_datetime(day_data[column])
+    hour_data[column] = pd.to_datetime(hour_data[column])
+
+selected_option = st.selectbox("Select Visualization Option", ["Total and Average Rentals on Daily Basis", "Total and Average Rentals per Season"])
+
+if selected_option == "Total and Average Rentals on Daily Basis":
+    st.header("Total and Average Rentals on Daily Basis")
     
-dteday_column = ["dteday"]
-for column in dteday_column:
-    hour_df[column] = pd.to_datetime(hour_df[column])
 
-st.title("Bike Sharing Data Visualization")
-st.sidebar.title("Menu")
-
-selected_option = st.sidebar.selectbox("Select Visualization Option", ["Total and Average Count of Rentals by Season", 
-                                                                      "Total and Average Count of Rentals by Weather",
-                                                                      "Total and Average Count of Rentals Trend Throughout the Day"])
-
-
-if selected_option == "Total and Average Count of Rentals by Season":
-    st.write("You selected: Total and Average Count of Rentals by Season")
+    hourly_rentals = hour_data.groupby("hr")['cnt'].sum()
+    fig, ax = plt.subplots(figsize=(10, 6))
+    hourly_rentals.plot(kind='line', ax=ax)
     
-    total_rentals_by_season = day_df.groupby(by="season").agg({
-    "instant": "nunique",
-    "casual": "sum",
-    "registered": "sum",
-    "cnt": "sum"
-    }).sort_values(by="cnt", ascending=False)
+    ax.set_xlabel('Time (Hours)', fontsize=12)
+    ax.set_ylabel('Total Rentals', fontsize=12)
+    ax.set_title('Total Rentals on Daily Basis', fontsize=14)
+    ax.grid(True)
+    
+    st.pyplot(fig)
 
-    fig_season1, ax_season1 = plt.subplots(figsize=(8, 6))
-    total_rentals_by_season.plot(kind='bar', color=['green', 'blue', 'orange', 'red'], ax=ax_season1)
-    season_names = ['Spring', 'Summer', 'Fall', 'Winter']
-    ax_season1.set_xlabel('Season (1:spring, 2:summer, 3:fall, 4:winter)')
-    ax_season1.set_ylabel('Total Count of Rentals')
-    ax_season1.set_title('Total Count of Rentals by Season')
-    ax_season1.set_xticklabels(season_names, rotation=0)
-    st.pyplot(fig_season1)
-    
-    avg_rentals_by_season = day_df.groupby(by="season").agg({
-    "instant": "nunique",
-    "casual": "mean",
-    "registered": "mean",
-    "cnt": "mean"
-    }).sort_values(by="cnt", ascending=False)
-    
-    fig_season2, ax_season2 = plt.subplots(figsize=(8, 6))
-    avg_rentals_by_season.plot(kind='bar', color=['green', 'blue', 'orange', 'red'], ax=ax_season2)
-    ax_season2.set_xlabel('Season (1:spring, 2:summer, 3:fall, 4:winter)')
-    ax_season2.set_ylabel('Average Count of Rentals')
-    ax_season2.set_title('Average Count of Rentals by Season')
-    ax_season2.set_xticklabels(season_names, rotation=0)
-    st.pyplot(fig_season2)
 
+    hourly_rentals_avg = hour_data.groupby("hr")['cnt'].mean()
+    fig, ax = plt.subplots(figsize=(10, 6))
+    hourly_rentals_avg.plot(kind='line', color='red', ax=ax)
     
-elif selected_option == "Total and Average Count of Rentals by Weather":
-    st.write("You selected: Total and Average Count of Rentals by Weather")
+    ax.set_xlabel('Time (Hours)', fontsize=12)
+    ax.set_ylabel('Average Rentals', fontsize=12)
+    ax.set_title('Average Rentals on Daily Basis', fontsize=14)
+    ax.grid(True)
     
-    total_rentals_by_weathersit = day_df.groupby(by="weathersit").agg({
-    "instant": "nunique",
-    "casual": "sum",
-    "registered": "sum",
-    "cnt": "sum"
-    }).sort_values(by="cnt", ascending=False)
+    st.pyplot(fig)
 
-    avg_rentals_by_weathersit = day_df.groupby(by="weathersit").agg({
+    st.subheader("Conclusion")
+    st.write("The peak of bike rentals occurs at two main times: 8 AM and 5 PM, coinciding with daily rush hours. The lowest number of rentals happens in the early morning, around 4 AM. Based on this trend, a more efficient operational strategy can focus the bike rental service from midday to the afternoon. Ensuring more bikes are available in the evening will help meet the high demand and increase profits.")
+
+elif selected_option == "Total and Average Rentals per Season":
+    st.header("Total and Average Rentals per Season")
+    
+
+    seasonal_sum = day_data.groupby("season").agg({
+        "instant": "nunique",
+        "casual": "sum",
+        "registered": "sum",
+        "cnt": "sum"
+    })
+    
+    season_name = {1: 'Spring', 2: 'Summer', 3: 'Fall', 4: 'Winter'}
+    seasonal_sum = seasonal_sum[seasonal_sum.index.isin(season_name.keys())]
+    seasonal_sum.index = seasonal_sum.index.map(season_name)
+    
+    fig, ax = plt.subplots(figsize=(10, 6))
+    seasonal_sum[['cnt']].plot(kind='bar', ax=ax, color=['#1f77b4'])
+    
+    ax.set_xlabel('Season', fontsize=12)
+    ax.set_ylabel('Total Rentals', fontsize=12)
+    ax.set_title('Total Rentals per Season', fontsize=14)
+    ax.set_xticklabels(season_name.values(), rotation=0, fontsize=10)
+    ax.grid(True)
+    
+    st.pyplot(fig)
+    
+
+    seasonal_avg = day_data.groupby("season").agg({
         "instant": "nunique",
         "casual": "mean",
         "registered": "mean",
         "cnt": "mean"
-    }).sort_values(by="cnt", ascending=False)
-    
-    fig_weather1, ax_weather1 = plt.subplots(figsize=(8, 6))
-    total_rentals_by_weathersit.plot(kind='bar', color=['green', 'blue', 'orange', 'red'], ax=ax_weather1)
-    ax_weather1.set_xlabel('Weather (1: Clear, 2: Mist+Cloudy, 3: Light Rain, 4: Heavy Rain)')
-    ax_weather1.set_ylabel('Total Count of Rentals')
-    ax_weather1.set_title('Total Count of Rentals by Weather')
-    st.pyplot(fig_weather1)
-    
-    fig_weather2, ax_weather2 = plt.subplots(figsize=(8, 6))
-    total_rentals_by_weathersit.plot(kind='bar', color=['green', 'blue', 'orange', 'red'], ax=ax_weather2)
-    ax_weather2.set_xlabel('Weather (1: Clear, 2: Mist+Cloudy, 3: Light Rain, 4: Heavy Rain)')
-    ax_weather2.set_ylabel('Average Count of Rentals')
-    ax_weather2.set_title('Average Count of Rentals by Weather')
-    st.pyplot(fig_weather2)
-    
-elif selected_option == "Total and Average Count of Rentals Trend Throughout the Day":
-    st.write("You selected: Total and Average Count of Rentals Trend Throughout the Day")
-    
-    hourly_rentals_total = hour_df.groupby('hr')['cnt'].sum()
-    
-    hourly_rentals_avg = hour_df.groupby('hr')['cnt'].mean().round()
+    })
 
-    fig_total_trend, ax_total_trend = plt.subplots(figsize=(10, 6))
-    hourly_rentals_total.plot(kind='line', marker='o', color='blue', ax=ax_total_trend)
-    ax_total_trend.set_xlabel('Hour of the Day')
-    ax_total_trend.set_ylabel('Total Count of Rentals')
-    ax_total_trend.set_title('Total Count of Rentals Trend Throughout the Day')
-    ax_total_trend.set_xticks(hourly_rentals_total.index)
-    ax_total_trend.grid(True)
-    st.pyplot(fig_total_trend)
+    seasonal_avg = seasonal_avg[seasonal_avg.index.isin(season_name.keys())]
+    seasonal_avg.index = seasonal_avg.index.map(season_name)
 
-    fig_avg_trend, ax_avg_trend = plt.subplots(figsize=(10, 6))
-    hourly_rentals_avg.plot(kind='line', marker='o', color='green', ax=ax_avg_trend)
-    ax_avg_trend.set_xlabel('Hour of the Day')
-    ax_avg_trend.set_ylabel('Average Count of Rentals (Rounded)')
-    ax_avg_trend.set_title('Average Count of Rentals Trend Throughout the Day')
-    ax_avg_trend.set_xticks(hourly_rentals_avg.index)
-    ax_avg_trend.grid(True)
-    st.pyplot(fig_avg_trend)
+    fig, ax = plt.subplots(figsize=(10, 6))
+    seasonal_avg[['cnt']].plot(kind='bar', ax=ax, color=['#ff7f0e'])
+    
+    ax.set_xlabel('Season', fontsize=12)
+    ax.set_ylabel('Average Rentals', fontsize=12)
+    ax.set_title('Average Rentals per Season', fontsize=14)
+    ax.set_xticklabels(season_name.values(), rotation=0, fontsize=10)
+    ax.grid(True)
+    
+    st.pyplot(fig)
+
+    st.subheader("Conclusion")
+    st.write("The peak of bike rentals is observed in the fall and summer, while winter and spring experience a significant decline. Fall emerges as the season with the highest demand, followed by summer, winter, and finally spring. This data can guide a more effective rental strategy, focusing on availability and promotions during the high-demand seasons, while adjusting operations during the low-demand seasons to reduce costs.")
