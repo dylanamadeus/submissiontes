@@ -13,11 +13,11 @@ st.markdown("""
         padding: 20px;
     }
     .subtitle {
-        font-size: 20px;
+        font-size: 16px;
         font-weight: normal;
         color: #4b6584;
         text-align: center;
-        margin-top: -15px;
+        margin-top: -30px;
         padding-bottom: 20px;
         font-style: italic;
     }
