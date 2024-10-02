@@ -6,14 +6,24 @@ import os
 st.markdown("""
     <style>
     .title {
-        font-size: 40px;
+        font-size: 38px;
         font-weight: bold;
         color: #1f77b4;
         text-align: center;
         padding: 20px;
     }
+    .subtitle {
+        font-size: 20px;
+        font-weight: normal;
+        color: #4b6584;
+        text-align: center;
+        margin-top: -15px;
+        padding-bottom: 20px;
+        font-style: italic;
+    }
     </style>
     <h1 class="title">🚴‍♂️ Bike Sharing Data Visualization 🚴‍♀️</h1>
+    <h2 class="subtitle">Exploring Trends and Insights from Bike Rentals</h2>
     """, unsafe_allow_html=True)
 
 project_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
