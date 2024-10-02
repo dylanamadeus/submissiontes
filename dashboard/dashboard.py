@@ -6,7 +6,7 @@ import os
 st.markdown("""
     <style>
     .title {
-        font-size: 32px;
+        font-size: 40px;
         font-weight: bold;
         color: #1f77b4;
         text-align: center;
@@ -76,7 +76,7 @@ elif selected_option == "Total and Average Rentals per Season":
     seasonal_sum.index = seasonal_sum.index.map(season_name)
     
     fig, ax = plt.subplots(figsize=(10, 6))
-    seasonal_sum.plot(kind='bar', ax=ax, color=['#1f77b4'])
+    seasonal_sum.plot(kind='bar', ax=ax)
     
     ax.set_xlabel('Season', fontsize=12)
     ax.set_ylabel('Rentals\' Count', fontsize=12)
@@ -98,7 +98,7 @@ elif selected_option == "Total and Average Rentals per Season":
     seasonal_avg.index = seasonal_avg.index.map(season_name)
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    seasonal_avg.plot(kind='bar', ax=ax, color=['#ff7f0e'])
+    seasonal_avg.plot(kind='bar', ax=ax)
     
     ax.set_xlabel('Season', fontsize=12)
     ax.set_ylabel('Rentals\' Average', fontsize=12)
